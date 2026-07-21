@@ -1,15 +1,17 @@
 "use client";
+
+import { GraduationCap, LogIn } from "lucide-react";
 import { useState } from "react";
 import { login } from "./actions";
-import { GraduationCap } from "lucide-react";
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(formData: FormData) {
+  async function handleLogin(formData: FormData) {
     setLoading(true);
     setError(null);
+
     const result = await login(formData);
     if (result?.error) {
       setError(result.error);
@@ -18,48 +20,94 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4" dir="rtl">
-      <div className="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border border-slate-100">
-        <div className="flex flex-col items-center mb-8">
-          <div className="bg-brand-600 p-3 rounded-2xl text-white mb-4">
-            <GraduationCap size={32} />
+    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
+      <section className="surface-panel w-full max-w-5xl overflow-hidden">
+        <div className="grid min-h-[560px] grid-cols-1 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="flex flex-col justify-between bg-inverse-surface p-8 text-inverse-on-surface">
+            <div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-default bg-primary text-on-primary">
+                <GraduationCap size={28} />
+              </div>
+              <h1 className="mt-6 text-3xl font-semibold tracking-[-0.01em]">
+                Al Abakera EMS
+              </h1>
+              <p className="mt-3 max-w-sm text-sm leading-6 text-inverse-on-surface/72">
+                Secure access for admins, teachers, students, and parents.
+              </p>
+            </div>
+
+            <div className="rounded-default border border-white/10 bg-white/5 p-4">
+              <p className="text-sm font-semibold">Admin-managed accounts</p>
+              <p className="mt-2 text-sm leading-6 text-inverse-on-surface/70">
+                Users receive their username and password from an administrator.
+              </p>
+            </div>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">سنتر العباقرة</h1>
-          <p className="text-slate-500 text-sm mt-1">لوحة تحكم المدير العام</p>
+
+          <div className="flex flex-col justify-center p-6 sm:p-8">
+            <div className="mb-8">
+              <p className="label-caps">Welcome back</p>
+              <h2 className="mt-2 text-[30px] font-semibold leading-9 tracking-[-0.01em] text-on-surface">
+                Login to your workspace
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-on-surface-variant">
+                Use the username and password provided by your admin.
+              </p>
+            </div>
+
+            {error && (
+              <div className="mb-4 rounded-default border border-error/30 bg-error-container px-4 py-3 text-sm font-medium text-on-error-container">
+                {error}
+              </div>
+            )}
+
+            <form action={handleLogin} className="space-y-4">
+              <Field
+                label="Username"
+                name="email"
+                placeholder="teacher-8k2m4p"
+              />
+              <Field
+                label="Password"
+                name="password"
+                type="password"
+                placeholder="••••••••"
+              />
+              <button disabled={loading} className="btn-primary w-full">
+                <LogIn size={16} />
+                {loading ? "Signing in..." : "Login"}
+              </button>
+            </form>
+          </div>
         </div>
+      </section>
+    </main>
+  );
+}
 
-        <form action={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">البريد الإلكتروني</label>
-            <input 
-              name="email" 
-              type="email" 
-              required 
-              className="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-brand-500 transition-all outline-none"
-              placeholder="admin@abakera.com"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">كلمة المرور</label>
-            <input 
-              name="password" 
-              type="password" 
-              required 
-              className="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-brand-500 transition-all outline-none"
-              placeholder="••••••••"
-            />
-          </div>
-
-          {error && <p className="text-rose-500 text-sm bg-rose-50 p-3 rounded-lg text-center">{error}</p>}
-
-          <button 
-            disabled={loading}
-            className="w-full bg-brand-600 text-white py-3 rounded-xl font-bold hover:bg-brand-700 transition-all shadow-lg shadow-brand-100 disabled:opacity-50"
-          >
-            {loading ? "جاري الدخول..." : "تسجيل الدخول"}
-          </button>
-        </form>
-      </div>
-    </div>
+function Field({
+  label,
+  name,
+  type = "text",
+  placeholder,
+}: {
+  label: string;
+  name: string;
+  type?: string;
+  placeholder?: string;
+}) {
+  return (
+    <label className="block space-y-2">
+      <span className="text-sm font-semibold text-on-surface-variant">
+        {label}
+      </span>
+      <input
+        name={name}
+        type={type}
+        required
+        placeholder={placeholder}
+        className="input-field w-full"
+      />
+    </label>
   );
 }

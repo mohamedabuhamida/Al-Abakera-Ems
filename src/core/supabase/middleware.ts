@@ -35,5 +35,32 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  const pathname = request.nextUrl.pathname
+  const isAuthRoute = pathname === '/login'
+  const isProtectedRoute = [
+    '/dashboard',
+    '/students',
+    '/settings',
+    '/users',
+    '/teachers',
+    '/subjects',
+    '/groups',
+    '/billing',
+  ].some((route) => pathname === route || pathname.startsWith(`${route}/`))
+
+  if (!user && isProtectedRoute) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    url.searchParams.set('next', pathname)
+    return NextResponse.redirect(url)
+  }
+
+  if (user && isAuthRoute) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard'
+    url.search = ''
+    return NextResponse.redirect(url)
+  }
+
   return supabaseResponse
 }

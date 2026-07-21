@@ -1,37 +1,33 @@
-import { createClient } from "@/core/supabase/client";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { type Student } from "@/core/types";
+import { useCallback, useEffect, useState } from "react";
 
-type StudentRow = Omit<Student, "profiles">;
+type StudentsPayload = {
+  students: Student[];
+  errors: string[];
+};
+
+async function fetchStudents() {
+  const response = await fetch("/api/students", {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error("STUDENTS_LOAD_FAILED");
+  }
+
+  const payload = (await response.json()) as StudentsPayload;
+
+  if (payload.errors.length > 0) {
+    throw new Error(payload.errors[0]);
+  }
+
+  return payload.students;
+}
 
 export function useStudents() {
-  const supabase = useMemo(() => createClient(), []);
   const [data, setData] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const fetchStudents = useCallback(async () => {
-    const { data, error } = await supabase
-      .from("students")
-      .select(
-        `
-        id,
-        student_code,
-        full_name,
-        educational_stage,
-        grade,
-        parent_name,
-        whatsapp_number,
-        status,
-        registration_date
-      `
-      )
-      .order("registration_date", { ascending: false });
-
-    if (error) throw error;
-
-    return (data ?? []) as StudentRow[];
-  }, [supabase]);
 
   const loadStudents = useCallback(async () => {
     try {
@@ -39,11 +35,11 @@ export function useStudents() {
       setError(null);
       setData(await fetchStudents());
     } catch (err) {
-      setError(err instanceof Error ? err.message : "تعذر تحميل بيانات الطلاب");
+      setError(err instanceof Error ? err.message : "STUDENTS_LOAD_FAILED");
     } finally {
       setLoading(false);
     }
-  }, [fetchStudents]);
+  }, []);
 
   useEffect(() => {
     let isActive = true;
@@ -55,7 +51,7 @@ export function useStudents() {
         setData(students);
       } catch (err) {
         if (!isActive) return;
-        setError(err instanceof Error ? err.message : "تعذر تحميل بيانات الطلاب");
+        setError(err instanceof Error ? err.message : "STUDENTS_LOAD_FAILED");
       } finally {
         if (isActive) setLoading(false);
       }
@@ -66,7 +62,7 @@ export function useStudents() {
     return () => {
       isActive = false;
     };
-  }, [fetchStudents]);
+  }, []);
 
   return { data, loading, error, refresh: loadStudents };
 }
