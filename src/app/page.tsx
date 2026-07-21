@@ -1,7 +1,27 @@
-import { redirect } from "next/navigation";
-import { getCurrentUserAccess } from "@/core/auth/server";
+// app/page.tsx (updated)
 
-export default async function RootPage() {
-  const access = await getCurrentUserAccess();
-  redirect(access ? "/dashboard" : "/login");
+"use client";
+
+import { useLanguage } from "@/core/i18n/useLanguage";
+import { Hero } from "@/components/landing/Hero";
+import { Features } from "@/components/landing/Features";
+import { Stats } from "@/components/landing/Stats";
+import { Testimonials } from "@/components/landing/Testimonials";
+import { CTA } from "@/components/landing/CTA";
+import { Footer } from "@/components/landing/Footer";
+
+export default function LandingPage() {
+  const { language } = useLanguage();
+  const isArabic = language === "ar";
+
+  return (
+    <main className="min-h-screen">
+      <Hero isArabic={isArabic} />
+      <Stats isArabic={isArabic} />
+      <Features isArabic={isArabic} />
+      <Testimonials isArabic={isArabic} />
+      <CTA isArabic={isArabic} />
+      <Footer isArabic={isArabic} />
+    </main>
+  );
 }
